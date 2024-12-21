@@ -1,5 +1,4 @@
-﻿// Domain/Services/DiscountCodeGenerator.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,7 +24,6 @@ namespace DiscountSystem.Domain.Services
         {
             ValidateParameters(count, length);
 
-            var existingCodes = new HashSet<string>(await _repository.GetAllCodesAsync());
             var newCodes = new List<DiscountCode>(count);
 
             for (int i = 0; i < count; i++)
@@ -35,13 +33,10 @@ namespace DiscountSystem.Domain.Services
                 {
                     code = GenerateRandomCode(length);
                 }
-                while (!existingCodes.Add(code));
+                while (await _repository.ExistsAsync(code));
 
                 newCodes.Add(new DiscountCode(code));
             }
-
-            if (newCodes.Count < count)
-                throw new InvalidOperationException(ErrorMessages.GenerationFailed);
 
             return newCodes;
         }
